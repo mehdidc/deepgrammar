@@ -99,12 +99,13 @@ class Classifier:
 
 
 grammar = r"""
-archi = archi_stmts optim_stmts
-optim_stmts = lr_stmt "\n" epochs_stmt "\n" batch_size_stmt "\n" ratio_valid_stmt "\n" optimizer_stmt "\n" 
+archi = optim_stmts archi_stmts
+optim_stmts = lr_stmt "\n" epochs_stmt "\n" batch_size_stmt "\n" ratio_valid_stmt "\n" optimizer_stmt "\n"  activation_stmt "\n"
 optimizer_stmt = "opt = optimizers." opt
 epochs_stmt = "epochs = " epochs 
 batch_size_stmt = "batch_size = " batch_size
 ratio_valid_stmt = "ratio_valid = " ratio_valid
+activation_stmt = "activation = " activation
 lr_stmt = "lr = " lr
 opt = sgd
 sgd = "SGD(lr=lr, momentum=" momentum ", decay=" decay ", nesterov=" nesterov ")"
@@ -126,14 +127,14 @@ conv_archi_stmt = (conv dropout pooling) / (conv dropout) / conv
 flatten = "x = Flatten()(x)\n"
 fc_archi_stmts = (fc_archi_stmt fc_archi_stmt) / fc_archi_stmt
 fc_archi_stmt = (fc dropout) / fc 
-fc = "x = Dense(" nb_units ", activation=" activation ", kernel_initializer=" init ", kernel_regularizer = " reg ")(x)\n"
-conv = "x = Conv2D(" filters ", " kernel_size ", strides=" strides ", activation=" activation ", kernel_initializer=" init ", kernel_regularizer=" reg  ", padding=" padding ")(x)\n"
+fc = "x = Dense(" nb_units ", activation=activation, kernel_initializer=" init ", kernel_regularizer = " reg ")(x)\n"
+conv = "x = Conv2D(" filters ", " kernel_size ", strides=" strides ", activation=activation, kernel_initializer=" init ", kernel_regularizer=" reg  ", padding=" padding ")(x)\n"
 reg = "l2(1e-4)"
 padding = "\"valid\"" / "\"same\""
 filters = "16" / "32" / "48" / "64" / "80" / "96" / "112"
 kernel_size =  "1" / "3" / "5" / "7"
 strides = "(1, 1)"
-activation = "\"relu\""
+activation = "\"relu\"" / "\"elu\"" 
 pooling = "x = " poolingop "(2)(x)\n"
 poolingop = "MaxPooling2D"
 init = "\"glorot_uniform\""
@@ -146,7 +147,7 @@ grammar = build_grammar(grammar)
 
 
 def classifier():
-    min_depth = np.random.choice((5, 10, 15, 20))
+    min_depth = np.random.choice((5, 10, 15))
     max_depth = min_depth + 10
     wl = RandomWalker(grammar, min_depth=min_depth, max_depth=max_depth)
     wl.walk()

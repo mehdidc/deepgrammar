@@ -14,7 +14,8 @@ classifier_tpl = open(os.path.join(os.path.dirname(__file__), 'classifier_tpl.py
 def random():
     rng = np.random
     random_state = rng.randint(1, 2**32)
-    depth = 5
+    rng = np.random.RandomState(random_state)
+    depth = rng.randint(5, 12)
     min_depth = depth
     max_depth = depth
     wl = RandomWalker(grammar, min_depth=min_depth, max_depth=max_depth, random_state=random_state)
@@ -29,7 +30,8 @@ def random():
         },
         'info': {
             'depth': depth,
-            'random_state': random_state
+            'random_state': random_state,
+            'architecture': architecture,
         }
     }
     return out

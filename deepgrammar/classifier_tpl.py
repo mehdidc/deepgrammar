@@ -16,9 +16,11 @@ from keras import optimizers
 from keras.utils import to_categorical
 from keras.callbacks import Callback
 from keras.regularizers import l2, l1
+from keras import backend as K
 
 from sklearn.utils import shuffle
 
+batch_norm_axis = 3 if K.image_data_format() == 'channels_last' else 1
 
 class LearningRateScheduler(Callback):
     

@@ -21,8 +21,7 @@ def random():
     wl = RandomWalker(grammar, min_depth=min_depth, max_depth=max_depth, random_state=random_state)
     wl.walk()
     architecture = as_str(wl.terminals)
-    architecture = _indent(architecture, 8)
-    code = classifier_tpl.format(architecture=architecture)
+    code = format_code(architecture)
     print(code)
     out = {
         'codes': {
@@ -35,6 +34,26 @@ def random():
         }
     }
     return out
+
+nb_spaces_indent = 8
+
+def format_code(architecture):
+    architecture = _indent(architecture, nb_spaces_indent)
+    code = classifier_tpl.format(architecture=architecture)
+    return code
+
+def get_architecture_from_code(code):
+    lines = code.split('\n')
+    first, last = None, None
+    for i, line in enumerate(lines):
+        if 'activation = ' in line:
+            first = i
+        if 'opt = ' in line:
+            last = i
+    assert first and last
+    lines = lines[first:last + 1]
+    lines = [l[nb_spaces_indent:] for l in lines]
+    return '\n'.join(lines) + '\n'
 
 
 def _indent(s, nb_spaces):

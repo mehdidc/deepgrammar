@@ -15,6 +15,7 @@ from keras.models import Model
 from keras import optimizers
 from keras.utils import to_categorical
 from keras.callbacks import Callback
+from keras.callbacks import EarlyStopping
 from keras.regularizers import l2, l1
 from keras import backend as K
 
@@ -61,23 +62,29 @@ class Classifier:
         )
         callbacks = [
             LearningRateScheduler(lr, epochs),
+            EarlyStopping(monitor='val_acc', patience=30, verbose=1)
         ]
         X = self.transform(X)
         y = to_categorical(y, n_outputs)
-        X_train = X
-        y_train = y
+        nb_train = int(len(X) * 0.9)
+        X_train = X[0:nb_train]
+        y_train = y[0:nb_train]
+        X_valid = X[nb_train:]
+        y_valid = y[nb_train:]
         X_train_flip = X_train[:,:,:,::-1]
         y_train_flip = y_train
         X_train = np.concatenate((X_train, X_train_flip),axis=0)
         y_train = np.concatenate((y_train, y_train_flip),axis=0)
-        X_train, y_train = shuffle(X_train, y_train)
+        X_train, y_train = shuffle(X_train, y_train, random_state=42)
         self.model.fit(
             X_train, y_train, 
             epochs=epochs, 
             callbacks=callbacks, 
-            batch_size=batch_size, 
+            batch_size=batch_size,
+            validation_data=(X_valid, y_valid),
         )
-        return self
+        return self.model.history.history
+
       
     def transform(self, X): 
         return (X - self.mu) / self.std

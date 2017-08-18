@@ -17,7 +17,7 @@ fc_archi_stmt = fc batchnorm act_layer (dropout / none)
 fc = "x = Dense(" nb_units ", activation='linear', kernel_initializer=" init ", kernel_regularizer=l2(l2_coef))(x)\n"
 batchnorm = "x = BatchNormalization(axis=batch_norm_axis)(x) if use_batch_norm else x\n"
 conv = "x = " conv_layer "(" filters ", " kernel_size ", strides=" strides ", activation='linear', kernel_initializer=" init ", kernel_regularizer=l2(l2_coef), padding=" padding ")(x)\n"
-conv_layer = "Conv2D" / "Conv2DTranspose"
+conv_layer = "Conv2D"
 act_layer = "x = Activation(activation)(x)\n"
 
 flatten = "x = Flatten()(x)\n"
@@ -43,9 +43,9 @@ sgd = "SGD(lr=lr, momentum=" momentum ", decay=" decay ", nesterov=" nesterov ")
 lr = "0.1" / "0.05" / "0.01" / "0.005" / "0.001"
 batch_size = "64"
 momentum = "0.9"
-nesterov = bool
+nesterov = "True"
 bool = "True" / "False"
-epochs = "50" / "100" / "150" / "200"
+epochs = "100" 
 nb_units = "128" / "256" / "512" / "1024" / "2048"
 none = ""
 """

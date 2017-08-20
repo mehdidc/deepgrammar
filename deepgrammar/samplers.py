@@ -33,7 +33,7 @@ def random():
     rng = np.random
     random_state = rng.randint(1, 2**32)
     rng = np.random.RandomState(random_state)
-    depth = rng.randint(5, 12)
+    depth = rng.randint(5, 24)
     min_depth = depth
     max_depth = depth
     wl = RandomWalker(

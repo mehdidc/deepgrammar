@@ -18,7 +18,7 @@ from grammaropt.rnn import RnnAdapter
 from grammaropt.rnn import RnnWalker
 
 from deepgrammar.grammar import grammar
-from deepgrammar.samplers import rnn, random
+from deepgrammar.samplers import random
 
 def acc(pred, true_classes):
     _, pred_classes = pred.max(1)

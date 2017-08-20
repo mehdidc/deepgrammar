@@ -11,9 +11,9 @@ batchnorm_stmt = "use_batch_norm = " bool "\n"
 
 archi_stmts = conv_archi_stmts flatten fc_archi_stmts
 conv_archi_stmts = (conv_archi_stmt conv_archi_stmts) / conv_archi_stmt
-conv_archi_stmt = conv batchnorm act_layer (dropout / none) (pooling / none)
+conv_archi_stmt = conv batchnorm act_layer (none / dropout) none
 fc_archi_stmts = (fc_archi_stmt fc_archi_stmt) / fc_archi_stmt
-fc_archi_stmt = fc batchnorm act_layer (dropout / none)
+fc_archi_stmt = fc batchnorm act_layer (none / dropout)
 fc = "x = Dense(" nb_units ", activation='linear', kernel_initializer=" init ", kernel_regularizer=l2(l2_coef))(x)\n"
 batchnorm = "x = BatchNormalization(axis=batch_norm_axis)(x) if use_batch_norm else x\n"
 conv = "x = " conv_layer "(" filters ", " kernel_size ", strides=" strides ", activation='linear', kernel_initializer=" init ", kernel_regularizer=l2(l2_coef), padding=" padding ")(x)\n"
@@ -47,6 +47,6 @@ nesterov = "True"
 bool = "True" / "False"
 epochs = "100" 
 nb_units = "128" / "256" / "512" / "1024" / "2048"
-none = ""
+none = "\n"
 """
 grammar = build_grammar(grammar)

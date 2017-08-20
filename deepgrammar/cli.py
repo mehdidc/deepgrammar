@@ -132,7 +132,7 @@ def _resample(X, Y, nb=1):
     return X, Y
 
 def sample():
-    print(random()['info']['architecture'])
+    random()
 
 if __name__ == '__main__':
     run([train, sample])

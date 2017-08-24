@@ -17,6 +17,3 @@ def get_tok_to_id(rules):
     for i, r in enumerate(rules):
         tok_to_id[r] = i
     return tok_to_id
-
-
-

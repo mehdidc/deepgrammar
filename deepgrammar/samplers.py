@@ -12,7 +12,6 @@ from grammaropt.rnn import RnnWalker
 from .grammar import grammar
 from .utils import get_tok_to_id
 
-
 nb_spaces_indent = 8
 classifier_tpl = open(os.path.join(os.path.dirname(__file__), 'classifier_tpl.py')).read()
 
@@ -85,7 +84,7 @@ def _gen_from_walker(wl, random_state):
         'info': {
             'random_state': random_state,
             'architecture': architecture,
-            'min_depth': wl.max_depth,
+            'min_depth': wl.min_depth,
             'max_depth': wl.max_depth,
         }
     }

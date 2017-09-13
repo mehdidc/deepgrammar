@@ -10,7 +10,7 @@ from grammaropt.rnn import RnnAdapter
 from grammaropt.rnn import RnnWalker
 
 from .grammar import grammar
-from .utils import get_tok_to_id
+
 
 nb_spaces_indent = 8
 classifier_tpl = open(os.path.join(os.path.dirname(__file__), 'classifier_tpl.py')).read()
@@ -48,11 +48,10 @@ def rnn():
     random_state = rng.randint(1, 2**32)
     rng = np.random.RandomState(random_state)
     model = torch.load('rnn.th', map_location=lambda storage, loc: storage)
+    model.eval()
     model.use_cuda = False
-    rules = extract_rules_from_grammar(grammar)
-    tok_to_id = get_tok_to_id(rules)
-    rnn = RnnAdapter(model, tok_to_id, random_state=random_state)
-    wl = RnnWalker(grammar=grammar, rnn=rnn)
+    rnn = RnnAdapter(model, model.vect.tok_to_id, random_state=random_state)
+    wl = RnnWalker(grammar=model.vect.grammar, rnn=rnn)
     return _gen_from_walker(wl, random_state)
 
 

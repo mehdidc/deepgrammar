@@ -12,7 +12,7 @@ from torch.optim import Adam
 from torch.autograd import Variable
 
 from grammaropt.grammar import Vectorizer
-from grammaropt.grammar import NULL_SYMBOL
+from grammaropt.random import RandomWalker
 from grammaropt.rnn import RnnAdapter
 from grammaropt.rnn import RnnWalker
 from grammaropt.rnn import RnnModel
@@ -20,7 +20,6 @@ from grammaropt.rnn import RnnModel
 from deepgrammar.grammar import grammar
 from deepgrammar.samplers import random
 from deepgrammar.samplers import rnn
-from model import Model
 
 def acc(pred, true_classes):
     _, pred_classes = pred.max(1)
@@ -238,5 +237,76 @@ def sample(source='random'):
         rnn()
 
 
+def example():
+    import matplotlib as mpl
+    mpl.use('Agg')
+    import matplotlib.pyplot as plt
+    import torch
+    from grammaropt.grammar import as_str
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.pipeline import make_pipeline
+    from sklearn.ensemble import RandomForestRegressor
+    reg = make_pipeline(
+        TfidfVectorizer(),
+        RandomForestRegressor(max_depth=80),
+    )
+    db = load_db()
+    jobs = db.jobs_with(state='success')
+    jobs = list(jobs)
+    jobs = [j for j in jobs if j['sampler'] == 'deepgrammar.samplers.random']
+    X = [j['content']['info']['architecture'] for j in jobs]
+    R = np.array([max(j['stats']['valid']['accuracy']) for j in jobs])
+    reg.fit(X, R)
+    print((np.abs(reg.predict(X) - R) < 0.05).mean())
+    model = torch.load('rnn.th', map_location=lambda storage, loc: storage)
+    model.train()
+    model.use_cuda = False
+    rnn = RnnAdapter(model, model.vect.tok_to_id, random_state=42)
+    wl = RnnWalker(grammar=model.vect.grammar, rnn=rnn)
+    optim = torch.optim.Adam(model.parameters(), lr=1e-3)
+    R_avg = 0.
+    R_list_rnn = []
+    nb_iter = 500
+    #rnn
+    for _ in range(nb_iter):
+        wl.walk()
+        code = as_str(wl.terminals)
+        R = float(reg.predict([code])[0])
+        R_avg = R_avg * 0.9 + R * 0.1
+        model.zero_grad()
+        loss = (R - R_avg) * wl.compute_loss() / len(wl._decisions)
+        loss.backward()
+        optim.step()
+        R_list_rnn.append(R_avg)
+    #random
+    wl = RandomWalker(grammar=model.vect.grammar, min_depth=5, max_depth=30)
+    R_list_random = []
+    for _ in range(nb_iter):
+        wl.walk()
+        code = as_str(wl.terminals)
+        R = float(reg.predict([code])[0])
+        R_list_random.append(R)
+    #R_list_random = np.maximum.accumulate(R_list_random)
+    #R_list_rnn = np.maximum.accumulate(R_list_rnn)
+    fig = plt.figure(figsize=(15, 5))
+    plt.plot(R_list_random, color='b', label='random')
+    plt.plot(R_list_rnn, color='g', label='rnn')
+    plt.legend()
+    plt.savefig('rnn.png')
+
+def check():
+    import editdistance
+    db = load_db()
+    jobs = db.jobs_with(state='success')
+    jobs = list(jobs)
+    jobs = [j for j in jobs if j['sampler'] == 'deepgrammar.samplers.random']
+    X = [j['content']['info']['architecture'] for j in jobs]
+    R = np.array([max(j['stats']['valid']['accuracy']) for j in jobs])
+    for _ in range(10):
+        code = rnn()['info']['architecture']
+        indices = np.argsort([editdistance.eval(x, code) for x in X])
+        print(R[indices[0:5]])
+
+
 if __name__ == '__main__':
-    run([fit, sample])
+    run([fit, sample, check, example])

@@ -75,7 +75,6 @@ def _gen_from_walker(wl, random_state):
     wl.walk()
     architecture = as_str(wl.terminals)
     code = format_code(architecture)
-    print(code)
     out = {
         'codes': {
             'classifier': code
